@@ -1,0 +1,10 @@
+set PACKAGE {myPickingSlice}
+
+set LIBS {
+    hxplot hxtime hxsurface hxcolor hxfield
+    hxcore amiramesh mclib oiv tcl qt hxcluster
+}
+
+set SHARE {
+    share/resources/myPickingSlice.rc
+}

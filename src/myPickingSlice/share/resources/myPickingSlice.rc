@@ -1,0 +1,13 @@
+################################################################################
+#
+# Resource file of custom package myPickingSlice
+#
+################################################################################
+
+
+module -name     "myPickingSlice" \
+       -primary  "HxCluster" \
+       -class    "myPickingSlice" \
+       -category "Local" \
+       -package  "myPickingSlice" \
+       -icon     "TVDefDisplay"

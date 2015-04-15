@@ -1,0 +1,13 @@
+################################################################################
+#
+# Resource file of custom package myPickingSlice
+#
+################################################################################
+
+
+module -name     "myPickingSlice" \
+       -primary  "HxUniformScalarField3" \
+       -class    "myPickingSlice" \
+       -category "Local" \
+       -package  "myPickingSlice" \
+       -icon     "TVDefDisplay"

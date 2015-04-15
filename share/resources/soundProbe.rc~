@@ -1,0 +1,13 @@
+################################################################################
+#
+# Resource file of custom package soundProbe
+#
+################################################################################
+
+
+module -name     "soundProbe" \
+       -primary  "HxCluster" \
+       -class    "soundProbe" \
+       -category "Local" \
+       -package  "soundProbe" \
+       -icon     "TVDefCompute"

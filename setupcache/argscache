@@ -1,0 +1,1 @@
+set cached_argv [list --preset none --mainroot /var/remote/software/avizo/current --mainconfig Optimize --buildroot /home/rikerpw/develop3 --rundir /home/rikerpw/develop3/src/myPickingSlice --archs LinuxAMD64 --docskin AvizoSkin --intermediatedir obj --productdir .]
