@@ -26,13 +26,17 @@ HX_INIT_CLASS(myPickingSlice,HxClusterView)
 
 myPickingSlice::myPickingSlice() :
     HxClusterView(),
-    portAction(this,"action",QApplication::translate("soundProbe", "Action"))
+    portAction1(this,"action1",QApplication::translate("soundProbe", "Sound Settings"),2),
+    portAction2(this,"action2",QApplication::translate("soundProbe", "Action2"))
 
 {
     soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
         mymouseClickCB, this);
-    portAction.setLabel(0,"DoIt");
+    portAction1.setLabel(0,"On");
+    portAction1.setLabel(1,"Off");
+    portAction2.setLabel(0,"DoIt");
     _my_picked_id = 1;
+    _on = TRUE;
 
 }
 
@@ -86,7 +90,6 @@ void myPickingSlice::sendOSC()
 {
         HxCluster* _my_cluster = (HxCluster*) portData.source();
 
-
         boost::asio::io_service io_service;
         udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
         udp::resolver resolver(io_service);
@@ -94,9 +97,6 @@ void myPickingSlice::sendOSC()
         udp::resolver::iterator iterator = resolver.resolve(query);
         // create a OSC message
         tnyosc::Message msg("/data");
-        //msg.append("hello tnyosc");
-        //msg.append(_my_picked_id);
-        //msg.append(_my_cluster->getNumPoints());
         msg.append(_my_cluster->dataColumns[6].getFloat(_my_picked_id)); ///********************
         // send the message
         socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
@@ -105,7 +105,32 @@ void myPickingSlice::sendOSC()
 void myPickingSlice::compute()
 {
 
-    if (portAction.wasHit()) {
+
+    if (portAction1.wasHit(1)) {
+        theMsg->printf("SoundProbe Audio OFF\n");
+        boost::asio::io_service io_service;
+        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
+        udp::resolver resolver(io_service);
+        udp::resolver::query query(udp::v4(), HOST, PORT);
+        udp::resolver::iterator iterator = resolver.resolve(query);
+        // create a OSC message
+        tnyosc::Message msg("/global");
+        msg.append(0);
+        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+    }
+    if (portAction1.wasHit(0)) {
+        theMsg->printf("SoundProbe Audio ON\n");
+        boost::asio::io_service io_service;
+        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
+        udp::resolver resolver(io_service);
+        udp::resolver::query query(udp::v4(), HOST, PORT);
+        udp::resolver::iterator iterator = resolver.resolve(query);
+        // create a OSC message
+        tnyosc::Message msg("/global");
+        msg.append(1);
+        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+    }
+    if (portAction2.wasHit()) {
         theMsg->printf("SoundProbe Loaded\n");
         boost::asio::io_service io_service;
         udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
@@ -115,6 +140,7 @@ void myPickingSlice::compute()
         // create a OSC message
         tnyosc::Message msg("/test");
         msg.append("hello from Avizo");
+        msg.append(portAction1.getValue());
         socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
     }
     HxClusterView::compute();

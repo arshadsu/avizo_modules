@@ -530,8 +530,8 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h \
  /var/remote/software/avizo/current/include/hxcore/HxModule.h \
  /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h \
- /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  tinyosc++.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio/basic_datagram_socket.hpp \
@@ -1519,8 +1519,8 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h \
  /var/remote/software/avizo/current/include/hxcore/HxModule.h \
  /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h \
- /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  tinyosc++.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio/basic_datagram_socket.hpp \
@@ -2507,8 +2507,8 @@ myPickingSlice.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h :
 /var/remote/software/avizo/current/include/hxcore/HxModule.h :
 /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h :
-/var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h :
+/var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h :
 tinyosc++.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio/basic_datagram_socket.hpp :

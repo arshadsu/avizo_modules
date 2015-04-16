@@ -9,6 +9,7 @@
 
 #include <hxcore/HxModule.h>
 #include <hxcore/HxPortFloatSlider.h>
+#include <hxcore/HxPortButtonList.h>
 #include <hxcore/HxPortDoIt.h>
 #include "tinyosc++.h"
 #include <boost/asio.hpp>
@@ -24,9 +25,11 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
     myPickingSlice();
     ~myPickingSlice();
 
-    HxPortDoIt portAction;
+    HxPortButtonList portAction1;
+    HxPortDoIt portAction2;
     //HxCluster _my_cluster;
     int _my_picked_id;
+    bool _on;
 
     virtual void compute();
 
