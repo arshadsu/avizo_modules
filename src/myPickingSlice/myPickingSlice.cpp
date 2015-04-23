@@ -17,6 +17,7 @@
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/events/SoLocation2Event.h>
 
+//#define HOST ("192.168.7.200")
 #define HOST ("109.171.139.70")
 #define PORT ("6900")
 
@@ -27,7 +28,9 @@ HX_INIT_CLASS(myPickingSlice,HxClusterView)
 myPickingSlice::myPickingSlice() :
     HxClusterView(),
     portAction1(this,"action1",QApplication::translate("soundProbe", "Sound Settings"),2),
-    portAction2(this,"action2",QApplication::translate("soundProbe", "Action2"))
+    portAction2(this,"action2",QApplication::translate("soundProbe", "Action2")),
+    portAction3(this,"action3",QApplication::translate("soundProbe", "Data Layer"),6),
+    portAction4(this,"action4",QApplication::translate("soundProbe", "Constrain Layer"))
 
 {
     soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
@@ -35,8 +38,16 @@ myPickingSlice::myPickingSlice() :
     portAction1.setLabel(0,"On");
     portAction1.setLabel(1,"Off");
     portAction2.setLabel(0,"DoIt");
+    portAction3.setNum(2);
+    portAction3.setLabel(0, "first layer");
+    portAction3.setLabel(1, "second layer");
+    portAction4.setMinMax(0, 1);
+    portAction4.setEditButton(0);
+    portAction4.enableMinMaxRestriction(true);
+    //portAction4.setTextWidth(100);
     _my_picked_id = 1;
-    _on = TRUE;
+    _data_layer = -1;
+    //_on = TRUE;
 
 }
 
@@ -97,13 +108,38 @@ void myPickingSlice::sendOSC()
         udp::resolver::iterator iterator = resolver.resolve(query);
         // create a OSC message
         tnyosc::Message msg("/data");
-        msg.append(_my_cluster->dataColumns[6].getFloat(_my_picked_id)); ///********************
+        msg.append(_my_cluster->dataColumns[_data_layer].getFloat(_my_picked_id));
         // send the message
         socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
 }
 
 void myPickingSlice::compute()
 {
+        HxClusterView::compute();
+
+        HxCluster* _my_cluster = (HxCluster*) portData.source();
+
+        int numLayers = _my_cluster->dataColumns.size();
+        portAction3.setNum(numLayers);
+        float layer_contraints [numLayers][2];
+
+        int i;
+        for (i=0; i<numLayers; i++)
+            portAction3.setLabel(i, QString(_my_cluster->dataColumns[i].name));
+        _data_layer = portAction3.getValue(0);
+
+        portAction4.setClipValue(_my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max);
+        portAction4.setMinMax(_my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max);
+        layer_contraints[_data_layer][0] = portAction4.getValue(0);
+        layer_contraints[_data_layer][1] = portAction4.getValue(1);
+        if (!portAction3.isNew()) ///If there hasn't been a new layer selected, don't set the slider values
+        return;
+
+        portAction4.setValue(_my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max);
+        portAction4.setValue(layer_contraints[_data_layer][0],layer_contraints[_data_layer][1]);
+
+
+
 
 
     if (portAction1.wasHit(1)) {
@@ -143,7 +179,9 @@ void myPickingSlice::compute()
         msg.append(portAction1.getValue());
         socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
     }
-    HxClusterView::compute();
+
+
+
 }
 
 

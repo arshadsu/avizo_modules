@@ -15,6 +15,7 @@
 #include <boost/asio.hpp>
 #include "api.h"
 #include <hxcluster/HxClusterView.h>
+#include <hxcore/HxPortRangeSlider.h>
 
 class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
 {
@@ -27,9 +28,13 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
 
     HxPortButtonList portAction1;
     HxPortDoIt portAction2;
+    HxPortMultiMenu portAction3;
+    HxPortRangeSlider portAction4;
     //HxCluster _my_cluster;
     int _my_picked_id;
     bool _on;
+    int _data_layer;
+
 
     virtual void compute();
 
