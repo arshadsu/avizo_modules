@@ -8,8 +8,10 @@
 #include <Inventor/nodes/SoCube.h>
 
 #include <hxcore/HxModule.h>
+#include <hxcore/HxPortSeparator.h>
 #include <hxcore/HxPortFloatSlider.h>
 #include <hxcore/HxPortButtonList.h>
+#include <hxcore/HxPortText.h>
 #include <hxcore/HxPortDoIt.h>
 #include "tinyosc++.h"
 #include <boost/asio.hpp>
@@ -26,23 +28,32 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
     myPickingSlice();
     ~myPickingSlice();
 
-    HxPortButtonList portAction1;
-    HxPortDoIt portAction2;
-    HxPortMultiMenu portAction3;
-    HxPortRangeSlider portAction4;
-    //HxCluster _my_cluster;
+    HxPortSeparator portLine;               ///separator line
+    HxPortButtonList portAction1;           ///on/off button
+    HxPortDoIt portAction2;                 ///apply button (remove?)
+    HxPortMultiMenu portAction3;            ///data layer selection
+    HxPortRangeSlider portAction4;          ///data constraint
+    HxPortMultiMenu portAction5;            ///synth type
+    HxPortText portIP;                      ///IP Address Field
+    HxCluster* _my_cluster;
     int _my_picked_id;
     bool _on;
     int _data_layer;
+    int numLayers;
+    float layer_constraints[10][2]; ///find a better way to initialize or resize in constructor
+    char* IP;
 
+    void init();
 
-    virtual void compute();
+    //virtual void compute();
 
     void sendOSC();
 
     void mymouseClick(SoEventCallback *eventCB);
 
     static void mymouseClickCB(void *p, SoEventCallback *eventCB);
+
+    virtual void compute();
 
 };
 

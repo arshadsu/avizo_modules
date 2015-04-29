@@ -983,6 +983,7 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoHandleEventAction.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoRayPickAction.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoPickAction.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortRangeSlider.h \
  /var/remote/software/avizo/current/include/hxvertexset/SoSphereDetail.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoSubDetail.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoDetail.h \
@@ -1972,6 +1973,7 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoHandleEventAction.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoRayPickAction.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoPickAction.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortRangeSlider.h \
  /var/remote/software/avizo/current/include/hxvertexset/SoSphereDetail.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoSubDetail.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoDetail.h \
@@ -2960,6 +2962,7 @@ api.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoHandleEventAction.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoRayPickAction.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/actions/SoPickAction.h :
+/var/remote/software/avizo/current/include/hxcore/HxPortRangeSlider.h :
 /var/remote/software/avizo/current/include/hxvertexset/SoSphereDetail.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoSubDetail.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/details/SoDetail.h :

@@ -530,7 +530,9 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h \
  /var/remote/software/avizo/current/include/hxcore/HxModule.h \
  /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortSeparator.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortText.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  tinyosc++.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp \
@@ -911,7 +913,6 @@
  /var/remote/software/avizo/current/include/hxcore/HxPortMultiMenu.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortIntSlider.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortToggleList.h \
- /var/remote/software/avizo/current/include/hxcore/HxPortText.h \
  /var/remote/software/avizo/current/include/hxcore/HxGLPolyLine.h \
  /var/remote/software/avizo/current/include/mclib/McVec2f.h \
  /var/remote/software/avizo/current/include/hxcore/HxViewerTool.h \
@@ -1520,7 +1521,9 @@
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h \
  /var/remote/software/avizo/current/include/hxcore/HxModule.h \
  /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortSeparator.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h \
+ /var/remote/software/avizo/current/include/hxcore/HxPortText.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h \
  tinyosc++.h \
  /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp \
@@ -1901,7 +1904,6 @@
  /var/remote/software/avizo/current/include/hxcore/HxPortMultiMenu.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortIntSlider.h \
  /var/remote/software/avizo/current/include/hxcore/HxPortToggleList.h \
- /var/remote/software/avizo/current/include/hxcore/HxPortText.h \
  /var/remote/software/avizo/current/include/hxcore/HxGLPolyLine.h \
  /var/remote/software/avizo/current/include/mclib/McVec2f.h \
  /var/remote/software/avizo/current/include/hxcore/HxViewerTool.h \
@@ -2509,7 +2511,9 @@ myPickingSlice.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/oiv/Inventor/sys/SoGLType.h :
 /var/remote/software/avizo/current/include/hxcore/HxModule.h :
 /var/remote/software/avizo/current/include/hxcore/HxPickCallback.h :
+/var/remote/software/avizo/current/include/hxcore/HxPortSeparator.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortButtonList.h :
+/var/remote/software/avizo/current/include/hxcore/HxPortText.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortDoIt.h :
 tinyosc++.h :
 /var/remote/software/avizo/current/include/arch-LinuxAMD64/boost/asio.hpp :
@@ -2890,7 +2894,6 @@ api.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortMultiMenu.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortIntSlider.h :
 /var/remote/software/avizo/current/include/hxcore/HxPortToggleList.h :
-/var/remote/software/avizo/current/include/hxcore/HxPortText.h :
 /var/remote/software/avizo/current/include/hxcore/HxGLPolyLine.h :
 /var/remote/software/avizo/current/include/mclib/McVec2f.h :
 /var/remote/software/avizo/current/include/hxcore/HxViewerTool.h :
