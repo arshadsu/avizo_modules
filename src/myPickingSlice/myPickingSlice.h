@@ -30,6 +30,7 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
 
     HxPortSeparator portLine;               ///separator line
     HxPortButtonList portAction1;           ///on/off button
+    HxPortFloatSlider portVolume;           ///Volume Control
     HxPortDoIt portAction2;                 ///apply button (remove?)
     HxPortMultiMenu portAction3;            ///data layer selection
     HxPortRangeSlider portAction4;          ///data constraint
