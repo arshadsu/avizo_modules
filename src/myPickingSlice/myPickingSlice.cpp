@@ -257,6 +257,18 @@ void myPickingSlice::compute()
         msg.append(portAction1.getValue());
         socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
     }
+    if (portAction5.isNew()) {
+        theMsg->printf("SoundProbe Loaded\n");
+        boost::asio::io_service io_service;
+        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
+        udp::resolver resolver(io_service);
+        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
+        udp::resolver::iterator iterator = resolver.resolve(query);
+        /// create a OSC message
+        tnyosc::Message msg("/selection");
+        msg.append(portAction5.getValue(0));
+        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+    }
 
 
 
