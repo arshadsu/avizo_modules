@@ -2,31 +2,40 @@
  *  SoundProbe for HxCluster Data (Point Cloud)
  */
 #include <iostream>
-using std::cout;
-using std::endl;
+
 #include <QApplication>
 #include <hxcore/HxMessage.h>
-#include <hxfield/HxUniformScalarField3.h>
-//#include <hxlattice/hxOrthoslice.h>
-#include <hxcluster/HxCluster.h>
 #include <hxcore/HxObjectPool.h>
-#include "myPickingSlice.h"
-#include "tinyosc++.h"
-#include <boost/asio.hpp>
-#include <Inventor/events/SoMouseButtonEvent.h>
+#include <hxcluster/HxCluster.h>
 #include <hxcluster/HxClusterView.h>
+#include <hxfield/HxUniformScalarField3.h>
 #include <hxvertexset/SoSphereDetail.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/events/SoLocation2Event.h>
+#include <Inventor/events/SoMouseButtonEvent.h>
 
-//#define HOST ("192.168.7.200")
-#define HOST ("109.171.139.70")
-#define PORT ("6900")
+#include "myPickingSlice.h"
 
+
+//#define DEFAULT_OSC_SERVER  "109.171.139.70"
+#define RIKERPW_OSC_SERVER  "109.171.139.71"
+#define ARSHADSU_OSC_SERVER "109.171.139.88"
+#define DEFAULT_OSC_SERVER  ARSHADSU_OSC_SERVER
+#define DEFAULT_OSC_PORT    "6900"
+
+
+using std::cout;
+using std::endl;
 using boost::asio::ip::udp;
+
 
 HX_INIT_CLASS(myPickingSlice,HxClusterView)
 
+
+//////////
+// Constructor
+//   Calls parent class constructor and then sets up the UI elements
+//////////
 myPickingSlice::myPickingSlice() :
     HxClusterView(),
     portLine(this,"line1",QApplication::translate("soundProbe", "Line")),
@@ -36,11 +45,15 @@ myPickingSlice::myPickingSlice() :
     portAction3(this,"action3",QApplication::translate("soundProbe", "Data Layer"),6),
     portAction4(this,"action4",QApplication::translate("soundProbe", "Constrain Layer")),
     portAction5(this,"action5",QApplication::translate("soundProbe", "Synth Selection"),4),
-    portIP(this,"action6",QApplication::translate("soundProbe", "Server IP Address"))
-
+    portIP(this,"action6",QApplication::translate("soundProbe", "Server IP Address")),
+    dataInit(false),
+    pickedPrimIdx(1),
+    numLayers(0),
+    layerIdx(-1),
+    oscServerIp(NULL)
 {
     soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
-        mymouseClickCB, this);
+        mouseEventCB, this);
     portAction1.setLabel(0,"On");
     portAction1.setLabel(1,"Off");
     portVolume.setMinMax(0,1);
@@ -56,66 +69,61 @@ myPickingSlice::myPickingSlice() :
     portAction5.setLabel(1, "Frequency Synth");
     portAction5.setLabel(2, "Intensity Synth");
     portAction5.setLabel(3, "Rhythmic Synth");
-    portIP.setValue("109.171.139.70");
-
-
+    portIP.setValue(DEFAULT_OSC_SERVER);
     //portAction4.setTextWidth(100);
-
-
-    _my_picked_id = 1;
-    _data_layer = -1;
-
-
-
-
-///CAN'T PULL FROM _MY_CLUSTER HERE, ELSE SEGFAULT
-
 }
 
 
-
+//////////
+// Destructor
+//   No clean up needed for now
+//////////
 myPickingSlice::~myPickingSlice()
 {
 }
 
+
+//////////
+//   Called once when dataSet has been loaded to fetch the pointer, get the
+//   layers/fields and their attributes
+//////////
 void myPickingSlice::init()
 {
-    HxCluster* _my_cluster = (HxCluster*) portData.source();
-    numLayers = _my_cluster->dataColumns.size();
+    dataSet = (HxCluster*) portData.source();
+    numLayers = dataSet->dataColumns.size();
     portAction3.setNum(numLayers);
-    int i;
-    for (i=0; i<numLayers; i++){
-        portAction3.setLabel(i, QString(_my_cluster->dataColumns[i].name)); ///pull labels from data and set to GUI
-        layer_constraints[i][0] = _my_cluster->dataColumns[i].min; ///populate array with initial values from data
-        layer_constraints[i][1] = _my_cluster->dataColumns[i].max; ///populate array with initial values from data
-        //printf("Data Layer Array %i 0: %f\n", i, layer_constraints[i][0]);
-        //printf("Data Layer Array %i 1: %f\n", i, layer_constraints[i][1]);
+    for (int i = 0; i < numLayers; i++) {
+        ///pull labels from data and set to GUI
+        portAction3.setLabel(i, QString(dataSet->dataColumns[i].name));
+        ///get min and max values for all data layers
+        layerConstraints.push_back(std::pair<float,float>(dataSet->dataColumns[i].min,
+                                                          dataSet->dataColumns[i].max));
     }
-
-
 }
 
-void myPickingSlice::mymouseClickCB(void *p, SoEventCallback *eventCB)
+//////////
+//   This is actually mouse move callback
+//////////
+
+void myPickingSlice::mouseEventCB(void *p, SoEventCallback *eventCB)
 {
-    ((myPickingSlice*)p)->mymouseClick(eventCB);
+    ((myPickingSlice*)p)->onMouseEvent(eventCB);
 }
 
 
-
-void myPickingSlice::mymouseClick(SoEventCallback *eventCB)
+//////////
+//   Handles mouse event
+//////////
+void myPickingSlice::onMouseEvent(SoEventCallback *eventCB)
 {
     ///Need to default idx to 0 when not over an actual point
     const SoLocation2Event *event =
         (SoLocation2Event*)eventCB->getEvent();
 
     const SoPickedPoint* pickedPoint = eventCB->getPickedPoint();
-    if (pickedPoint == NULL)
-        printf("AAAAAAH");
     if (!pickedPoint) {
-        printf("nothing picked");
-        std::cout<<"nope"<<endl;
+        cout << "No picked point in mouse event" << endl;
         return;
-
     }
 
     const SoDetail *pickDetail = pickedPoint->getDetail();
@@ -131,152 +139,149 @@ void myPickingSlice::mymouseClick(SoEventCallback *eventCB)
     } else {
         theMsg->printf("Picked vertex %d" , idx);
     }
-    _my_picked_id = idx;
+    pickedPrimIdx = idx;
     SbVec2s pos = (event->getPosition());
-    std::cout<<"mouse now at "<<pos[0]<<", "<<pos[1]<<endl;
+    cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
 
-     myPickingSlice::sendOSC();
+    myPickingSlice::sendOSCPacket();
 
 }
 
 
-
-void myPickingSlice::sendOSC()
+//////////
+//    Helper function to print mouse event info on stdout
+//////////
+void myPickingSlice::printEventSource(const SoLocation2Event* event)
 {
-    HxCluster* _my_cluster = (HxCluster*) portData.source();
+    if (event) {
+        SoLocation2Event::EventSource src = event->getEventSource();
+        switch(src)
+        {
+        case SoLocation2Event::MOUSE_MOVE:
+            std::cout << "onMouseEvent: MOUSE_MOVE" << std::endl;
+            break;
+        case SoLocation2Event::MOUSE_ENTER:
+            std::cout << "onMouseEvent: MOUSE_ENTER" << std::endl;
+            break;
+        case SoLocation2Event::MOUSE_LEAVE:
+            std::cout << "onMouseEvent: MOUSE_LEAVE" << std::endl;
+            break;
+        case SoLocation2Event::OTHER:
+            std::cout << "onMouseEvent: OTHER" << std::endl;
+            break;
+        default:
+            std::cerr << "onMouseEvent: Unknown EventSource" << std::endl;
+            return;
+        }
+    }
+}
 
-     ///THIS BLOCK IS NOT COOL
-    QString str1 = portIP.getValue();
-    QByteArray ba = str1.toLatin1();
-    IP = ba.data();
-    ///END UNCOOL BLOCK
 
-    ///THIS BLOCK PREVIOUSLY FROM SEND OSC FUNCTION
-
-    boost::asio::io_service io_service;
-    udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-    udp::resolver resolver(io_service);
-    udp::resolver::query query(udp::v4(), IP, PORT); ///"IP" Arg used to be "HOST"
-    udp::resolver::iterator iterator = resolver.resolve(query);
+//////////
+//   Sends base OSC packet
+//////////
+void myPickingSlice::sendOSCPacket()
+{
     /// create a OSC message
     tnyosc::Message msg("/data");
-    msg.append(layer_constraints[_data_layer][0]);
-    msg.append(layer_constraints[_data_layer][1]);
-    msg.append(_my_cluster->dataColumns[_data_layer].getFloat(_my_picked_id));
+    msg.append(layerConstraints[layerIdx].first);
+    msg.append(layerConstraints[layerIdx].second);
+    msg.append(dataSet->dataColumns[layerIdx].getFloat(pickedPrimIdx));
     msg.append(portAction5.getValue(0));
     /// send the message
-    socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
-
-    /////////////////////////////////////////////////
-    ///END BLOCK PREVIOUSLY FROM SEND OSC FUNCTION///
-    /////////////////////////////////////////////////
-
-
-
+    send(msg);
 }
 
 
+//////////
+//    Called whenever a new selection is made in the UI so that new data data
+//    from selected layer/field is used for sonification
+//////////
 void myPickingSlice::compute()
 {
-    HxCluster* _my_cluster = (HxCluster*) portData.source();
-    static bool initialized = false;
-    if (!initialized) {
-    myPickingSlice::init();
-    initialized = true;
+    cout << "myPickingSlice::compute():" << endl;
+    /// Ensure that data we point to loaded dataset, but do that once only
+    if (!dataInit) {
+        init();
+        dataInit = true;
     }
-
-     ///THIS BLOCK IS NOT COOL
-    QString str1 = portIP.getValue();
-    QByteArray ba = str1.toLatin1();
-    IP = ba.data();
-    ///END UNCOOL BLOCK
-
+    /// call parent class function
     HxClusterView::compute();
-
-
-
-    _data_layer = portAction3.getValue(0);
-    portAction4.setClipValue(_my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max); ///init sliders
-    portAction4.setMinMax(_my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max); ///init sliders
-
+    /// get the data layer index
+    layerIdx = portAction3.getValue(0);
+    /// reset the slider min and max to current data layer
+    portAction4.setClipValue(dataSet->dataColumns[layerIdx].min, 
+                             dataSet->dataColumns[layerIdx].max);
+    portAction4.setMinMax(dataSet->dataColumns[layerIdx].min, 
+                          dataSet->dataColumns[layerIdx].max);
+    /// for new data update the slider otherwise just refetch the min and max
     if (portAction3.isNew()) {
-        portAction4.setValue(layer_constraints[_data_layer][0],layer_constraints[_data_layer][1]);
-        //printf("Data Layer: %i \nData Layer 0: %f \nData Layer 1: %f \nMin: %f \nMax: %f \n",_data_layer, layer_constraints[_data_layer][0], layer_constraints[_data_layer][1], _my_cluster->dataColumns[_data_layer].min, _my_cluster->dataColumns[_data_layer].max );
-        //return;
+        portAction4.setValue(layerConstraints[layerIdx].first, 
+                             layerConstraints[layerIdx].second);
     } else {
-        layer_constraints[_data_layer][0] = portAction4.getValue(0);
-        layer_constraints[_data_layer][1] = portAction4.getValue(1);
+        layerConstraints[layerIdx].first  = portAction4.getValue(0);
+        layerConstraints[layerIdx].second = portAction4.getValue(1);
     }
 
     if (portVolume.isNew()) {
         theMsg->printf("Volume Updated\n");
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-        udp::resolver resolver(io_service);
-        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
-        udp::resolver::iterator iterator = resolver.resolve(query);
         /// create a OSC message
         tnyosc::Message msg("/volume");
         msg.append(portVolume.getValue());
-        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+        /// send the message
+        send(msg);
     }
     if (portAction1.wasHit(1)) {
         theMsg->printf("SoundProbe Audio OFF\n");
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-        udp::resolver resolver(io_service);
-        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
-        udp::resolver::iterator iterator = resolver.resolve(query);
         /// create a OSC message
         tnyosc::Message msg("/global");
         msg.append(0);
-        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+        /// send the message
+        send(msg);
     }
     if (portAction1.wasHit(0)) {
         theMsg->printf("SoundProbe Audio ON\n");
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-        udp::resolver resolver(io_service);
-        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
-        udp::resolver::iterator iterator = resolver.resolve(query);
         /// create a OSC message
         tnyosc::Message msg("/global");
         msg.append(1);
-        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+        /// send the message
+        send(msg);
     }
     if (portAction2.wasHit()) {
         theMsg->printf("SoundProbe Loaded\n");
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-        udp::resolver resolver(io_service);
-        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
-        udp::resolver::iterator iterator = resolver.resolve(query);
         /// create a OSC message
         tnyosc::Message msg("/test");
         msg.append("hello from Avizo");
         msg.append(portAction1.getValue());
-        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+        /// send the message
+        send(msg);
     }
     if (portAction5.isNew()) {
         theMsg->printf("SoundProbe Loaded\n");
-        boost::asio::io_service io_service;
-        udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
-        udp::resolver resolver(io_service);
-        udp::resolver::query query(udp::v4(), IP, PORT);///"IP" Arg used to be "HOST"
-        udp::resolver::iterator iterator = resolver.resolve(query);
         /// create a OSC message
         tnyosc::Message msg("/selection");
         msg.append(portAction5.getValue(0));
-        socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+        /// send the message
+        send(msg);
     }
-
-
-
-
-
-
-
-
 }
 
+
+//////////
+//   Sends the given OSC packet to the server, using Boost Asynchronous Library
+//////////
+void myPickingSlice::send(tnyosc::Message& msg)
+{
+    /// get the current OSC server IP address as char*
+    QString str1 = portIP.getValue();
+    QByteArray ba = str1.toLatin1();
+    oscServerIp = ba.data();
+    /// create the socket and UDP packet from the received message, and ship it to the OSC server
+    boost::asio::io_service io_service;
+    udp::socket socket(io_service, udp::endpoint(udp::v4(), 0));
+    udp::resolver resolver(io_service);
+    udp::resolver::query query(udp::v4(), oscServerIp, DEFAULT_OSC_PORT);///"IP" Arg used to be "HOST"
+    udp::resolver::iterator iterator = resolver.resolve(query);
+    socket.send_to(boost::asio::buffer(msg.data(), msg.size()), *iterator);
+}
 
