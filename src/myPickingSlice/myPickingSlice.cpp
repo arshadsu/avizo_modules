@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <hxcore/HxMessage.h>
 #include <hxcore/HxObjectPool.h>
+#include <hxcore/HxController.h>
 #include <hxcluster/HxCluster.h>
 #include <hxcluster/HxClusterView.h>
 #include <hxfield/HxUniformScalarField3.h>
@@ -18,7 +19,7 @@
 
 
 //#define DEFAULT_OSC_SERVER  "109.171.139.70"
-#define RIKERPW_OSC_SERVER  "109.171.139.71"
+#define RIKERPW_OSC_SERVER  "109.171.139.70"
 #define ARSHADSU_OSC_SERVER "109.171.139.88"
 #define DEFAULT_OSC_SERVER  ARSHADSU_OSC_SERVER
 #define DEFAULT_OSC_PORT    "6900"
@@ -53,7 +54,8 @@ myPickingSlice::myPickingSlice() :
     oscServerIp(NULL)
 {
     soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
-        mouseEventCB, this);
+                                mouseEventCB, this);
+    theController->addPickCallback(mouseClickEventCB, (void*)this);
     portAction1.setLabel(0,"On");
     portAction1.setLabel(1,"Off");
     portVolume.setMinMax(0,1);
@@ -110,6 +112,24 @@ void myPickingSlice::mouseEventCB(void *p, SoEventCallback *eventCB)
     ((myPickingSlice*)p)->onMouseEvent(eventCB);
 }
 
+void myPickingSlice::mouseClickEventCB(void *p, SoEventCallback *eventCB)
+{
+    ((myPickingSlice*)p)->onMouseClickEvent(eventCB);
+}
+
+void myPickingSlice::onMouseClickEvent(SoEventCallback *eventCB)
+{
+    cout << "Received click event" << endl;
+    const SoLocation2Event *event = (SoLocation2Event*)eventCB->getEvent();
+    SbVec2s pos = (event->getPosition());
+    cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
+    const SoPickedPoint* pickedPoint = eventCB->getPickedPoint();
+    if (!pickedPoint) {
+        //cout << "No picked point in mouse event" << endl;
+        return;
+    }
+}
+
 
 //////////
 //   Handles mouse event
@@ -140,8 +160,8 @@ void myPickingSlice::onMouseEvent(SoEventCallback *eventCB)
         theMsg->printf("Picked vertex %d" , idx);
     }
     pickedPrimIdx = idx;
-    SbVec2s pos = (event->getPosition());
-    cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
+    //SbVec2s pos = (event->getPosition());
+    //cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
 
     myPickingSlice::sendOSCPacket();
 

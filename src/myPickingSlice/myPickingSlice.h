@@ -31,8 +31,10 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
   public:
     myPickingSlice();
     ~myPickingSlice();
-    void onMouseEvent(SoEventCallback *eventCB);
     static void mouseEventCB(void *p, SoEventCallback *eventCB);
+    void onMouseEvent(SoEventCallback *eventCB);
+    static void mouseClickEventCB(void *p, SoEventCallback *eventCB);
+    void onMouseClickEvent(SoEventCallback *eventCB);
     virtual void compute();
 
   private:
