@@ -31,8 +31,8 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
   public:
     myPickingSlice();
     ~myPickingSlice();
-    static void mouseEventCB(void *p, SoEventCallback *eventCB);
-    void onMouseEvent(SoEventCallback *eventCB);
+    static void mouseMoveEventCB(void *p, SoEventCallback *eventCB);
+    void onMouseMoveEvent(SoEventCallback *eventCB);
     static void mouseClickEventCB(void *p, SoEventCallback *eventCB);
     void onMouseClickEvent(SoEventCallback *eventCB);
     virtual void compute();
@@ -56,12 +56,15 @@ class MYPICKINGSLICE_API myPickingSlice : public HxClusterView
     int                layerIdx;
     PairVector         layerConstraints;
     char*              oscServerIp;
+    bool               mouseOnData;
 
     /// Private functions used internally
     void init();
     void sendOSCPacket();
     void send(tnyosc::Message& msg);
     void printEventSource(const SoLocation2Event* event);
+    void mouseOntoData();
+    void mouseOffData();
 };
 
 #endif // MYPICKINGSLICE_H

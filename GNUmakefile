@@ -92,7 +92,7 @@ obj/$(ARCH)/docdevelop3.lastbuild: $(wildcard  src/myPickingSlice/doc)
 
 obj/$(ARCH)/docdevelop3-docrun.lastbuild: $(wildcard  src/myPickingSlice/doc)
 	mkdir -p product/share/doc/avizo
-	/var/remote/software/avizo/current/bin/doc2html -A -skin AvizoSkin -local product -d product/share/doc/. -P src/myPickingSlice
+	/var/remote/software/avizo/9.0.0/bin/doc2html -A -skin AvizoSkin -local product -d product/share/doc/. -P src/myPickingSlice
 	@mkdir -p obj/$(ARCH)
 	@touch obj/$(ARCH)/docdevelop3-docrun.lastbuild
 

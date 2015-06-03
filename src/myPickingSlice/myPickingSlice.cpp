@@ -23,7 +23,7 @@
 #define ARSHADSU_OSC_SERVER "109.171.139.88"
 #define DEFAULT_OSC_SERVER  ARSHADSU_OSC_SERVER
 #define DEFAULT_OSC_PORT    "6900"
-
+#define DEBUG               0
 
 using std::cout;
 using std::endl;
@@ -51,11 +51,13 @@ myPickingSlice::myPickingSlice() :
     pickedPrimIdx(1),
     numLayers(0),
     layerIdx(-1),
-    oscServerIp(NULL)
+    oscServerIp(NULL),
+    mouseOnData(false)
 {
-    soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
-                                mouseEventCB, this);
-    theController->addPickCallback(mouseClickEventCB, (void*)this);
+    theController->addMouseMoveCallback(mouseMoveEventCB, this);
+    //soEventCB->addEventCallback(SoLocation2Event::getClassTypeId(),
+    //                            mouseMoveEventCB, this);
+    //theController->addPickCallback(mouseClickEventCB, (void*)this);
     portAction1.setLabel(0,"On");
     portAction1.setLabel(1,"Off");
     portVolume.setMinMax(0,1);
@@ -107,9 +109,9 @@ void myPickingSlice::init()
 //   This is actually mouse move callback
 //////////
 
-void myPickingSlice::mouseEventCB(void *p, SoEventCallback *eventCB)
+void myPickingSlice::mouseMoveEventCB(void *p, SoEventCallback *eventCB)
 {
-    ((myPickingSlice*)p)->onMouseEvent(eventCB);
+    ((myPickingSlice*)p)->onMouseMoveEvent(eventCB);
 }
 
 void myPickingSlice::mouseClickEventCB(void *p, SoEventCallback *eventCB)
@@ -119,13 +121,19 @@ void myPickingSlice::mouseClickEventCB(void *p, SoEventCallback *eventCB)
 
 void myPickingSlice::onMouseClickEvent(SoEventCallback *eventCB)
 {
+#if DEBUG
     cout << "Received click event" << endl;
+#endif
     const SoLocation2Event *event = (SoLocation2Event*)eventCB->getEvent();
+#if DEBUG
     SbVec2s pos = (event->getPosition());
     cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
+#endif
     const SoPickedPoint* pickedPoint = eventCB->getPickedPoint();
     if (!pickedPoint) {
-        //cout << "No picked point in mouse event" << endl;
+#if DEBUG
+        cout << "No picked point in mouse event" << endl;
+#endif
         return;
     }
 }
@@ -134,16 +142,35 @@ void myPickingSlice::onMouseClickEvent(SoEventCallback *eventCB)
 //////////
 //   Handles mouse event
 //////////
-void myPickingSlice::onMouseEvent(SoEventCallback *eventCB)
+void myPickingSlice::onMouseMoveEvent(SoEventCallback *eventCB)
 {
     ///Need to default idx to 0 when not over an actual point
     const SoLocation2Event *event =
         (SoLocation2Event*)eventCB->getEvent();
-
+#if DEBUG
+    SbVec2s pos = (event->getPosition());
+    cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
+#endif
     const SoPickedPoint* pickedPoint = eventCB->getPickedPoint();
     if (!pickedPoint) {
+#if DEBUG
         cout << "No picked point in mouse event" << endl;
+#endif
+        bool prevState = mouseOnData;
+        mouseOnData = false;
+        if (prevState) {
+            // mouse pointer just moved off-data from on-data region
+            mouseOffData();
+        }
         return;
+    }
+    else {
+        bool prevState = mouseOnData;
+        mouseOnData = true;
+        if (!prevState) {
+            // mouse pointer just moved on-data from off-data region
+            mouseOntoData();           
+        }
     }
 
     const SoDetail *pickDetail = pickedPoint->getDetail();
@@ -160,11 +187,26 @@ void myPickingSlice::onMouseEvent(SoEventCallback *eventCB)
         theMsg->printf("Picked vertex %d" , idx);
     }
     pickedPrimIdx = idx;
-    //SbVec2s pos = (event->getPosition());
-    //cout <<"** mouse now at "<< pos[0] << ", " << pos[1] << endl;
-
     myPickingSlice::sendOSCPacket();
 
+}
+
+
+//////////
+//    Do whatever needs to be done when mouse pointer moves onto data
+//    from off-data region
+//////////
+void myPickingSlice::mouseOntoData()
+{
+}
+
+
+//////////
+//    Do whatever needs to be done when mouse pointer moves off data
+//    from on-data region
+//////////
+void myPickingSlice::mouseOffData()
+{
 }
 
 
@@ -178,19 +220,19 @@ void myPickingSlice::printEventSource(const SoLocation2Event* event)
         switch(src)
         {
         case SoLocation2Event::MOUSE_MOVE:
-            std::cout << "onMouseEvent: MOUSE_MOVE" << std::endl;
+            std::cout << "onMouseMoveEvent: MOUSE_MOVE" << std::endl;
             break;
         case SoLocation2Event::MOUSE_ENTER:
-            std::cout << "onMouseEvent: MOUSE_ENTER" << std::endl;
+            std::cout << "onMouseMoveEvent: MOUSE_ENTER" << std::endl;
             break;
         case SoLocation2Event::MOUSE_LEAVE:
-            std::cout << "onMouseEvent: MOUSE_LEAVE" << std::endl;
+            std::cout << "onMouseMoveEvent: MOUSE_LEAVE" << std::endl;
             break;
         case SoLocation2Event::OTHER:
-            std::cout << "onMouseEvent: OTHER" << std::endl;
+            std::cout << "onMouseMoveEvent: OTHER" << std::endl;
             break;
         default:
-            std::cerr << "onMouseEvent: Unknown EventSource" << std::endl;
+            std::cerr << "onMouseMoveEvent: Unknown EventSource" << std::endl;
             return;
         }
     }
@@ -219,7 +261,9 @@ void myPickingSlice::sendOSCPacket()
 //////////
 void myPickingSlice::compute()
 {
+#if DEBUG
     cout << "myPickingSlice::compute():" << endl;
+#endif
     /// Ensure that data we point to loaded dataset, but do that once only
     if (!dataInit) {
         init();
