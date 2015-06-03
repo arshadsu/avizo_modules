@@ -169,7 +169,7 @@ void myPickingSlice::onMouseMoveEvent(SoEventCallback *eventCB)
         mouseOnData = true;
         if (!prevState) {
             // mouse pointer just moved on-data from off-data region
-            mouseOntoData();           
+            mouseOntoData();
         }
     }
 
@@ -187,8 +187,7 @@ void myPickingSlice::onMouseMoveEvent(SoEventCallback *eventCB)
         theMsg->printf("Picked vertex %d" , idx);
     }
     pickedPrimIdx = idx;
-    myPickingSlice::sendOSCPacket();
-
+    sendOSCPacket();
 }
 
 
@@ -198,6 +197,9 @@ void myPickingSlice::onMouseMoveEvent(SoEventCallback *eventCB)
 //////////
 void myPickingSlice::mouseOntoData()
 {
+#if DEBUG
+    cout << "mouseOntoData(): " << endl;
+#endif
 }
 
 
@@ -207,6 +209,10 @@ void myPickingSlice::mouseOntoData()
 //////////
 void myPickingSlice::mouseOffData()
 {
+//#if DEBUG
+    cout << "mouseOffData(): " << endl;
+//#endif
+    sendOSCPacket();
 }
 
 
@@ -244,14 +250,23 @@ void myPickingSlice::printEventSource(const SoLocation2Event* event)
 //////////
 void myPickingSlice::sendOSCPacket()
 {
-    /// create a OSC message
-    tnyosc::Message msg("/data");
-    msg.append(layerConstraints[layerIdx].first);
-    msg.append(layerConstraints[layerIdx].second);
-    msg.append(dataSet->dataColumns[layerIdx].getFloat(pickedPrimIdx));
-    msg.append(portAction5.getValue(0));
-    /// send the message
-    send(msg);
+    if (!mouseOnData) {
+        /// create a OSC enable message
+        tnyosc::Message msg("/enable");
+        msg.append(0);
+        /// send the message
+        send(msg);
+    }
+    else {
+        /// create a OSC data message
+        tnyosc::Message msg("/data");
+        msg.append(layerConstraints[layerIdx].first);
+        msg.append(layerConstraints[layerIdx].second);
+        msg.append(dataSet->dataColumns[layerIdx].getFloat(pickedPrimIdx));
+        msg.append(portAction5.getValue(0));
+        /// send the message
+        send(msg);
+    }
 }
 
 
