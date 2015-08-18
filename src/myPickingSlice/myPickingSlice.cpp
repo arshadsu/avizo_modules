@@ -45,7 +45,7 @@ myPickingSlice::myPickingSlice() :
     portAction2(this,"action2",QApplication::translate("soundProbe", "Action2")),
     portAction3(this,"action3",QApplication::translate("soundProbe", "Data Layer"),6),
     portAction4(this,"action4",QApplication::translate("soundProbe", "Constrain Layer")),
-    portAction5(this,"action5",QApplication::translate("soundProbe", "Synth Selection"),4),
+    portAction5(this,"action5",QApplication::translate("soundProbe", "Synth Selection"),5),
     portIP(this,"action6",QApplication::translate("soundProbe", "Server IP Address")),
     dataInit(false),
     pickedPrimIdx(1),
@@ -73,6 +73,7 @@ myPickingSlice::myPickingSlice() :
     portAction5.setLabel(1, "Frequency Synth");
     portAction5.setLabel(2, "Intensity Synth");
     portAction5.setLabel(3, "Rhythmic Synth");
+    portAction5.setLabel(4, "Binary Synth");
     portIP.setValue(DEFAULT_OSC_SERVER);
     //portAction4.setTextWidth(100);
 }
