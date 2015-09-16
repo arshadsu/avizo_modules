@@ -1,0 +1,13 @@
+################################################################################
+#
+# Resource file of custom package SonifySpatial
+#
+################################################################################
+
+
+module -name     "SonifySpatial" \
+       -primary  "HxUniformScalarField3" \
+       -class    "SonifySpatial" \
+       -category "Local" \
+       -package  "SonifySpatial" \
+       -icon     "TVDefDisplay"
