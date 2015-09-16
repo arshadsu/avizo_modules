@@ -6,7 +6,7 @@
 
 
 module -name     "SonifySpatial" \
-       -primary  "HxUniformScalarField3" \
+       -primary  "HxCluster" \
        -class    "SonifySpatial" \
        -category "Local" \
        -package  "SonifySpatial" \
