@@ -35,17 +35,8 @@ SonifySpatial::SonifySpatial() :
   , portIP(this,"action6",QApplication::translate("soundProbe", "Server IP Address"))
   , dataInit(false)
   , oscServerIp(NULL)
-  , lastCamParams(false)
-  , lastCamPosX(0.0f)
-  , lastCamPosY(0.0f)
-  , lastCamPosZ(0.0f)
-  , lastCamAxisX(0.0f)
-  , lastCamAxisY(1.0f)
-  , lastCamAxisZ(0.0f)
-  , lastCamAngle(0.0f)
-//  , portSize(this,"size", QApplication::translate("SonifySpatial", "Size"))
+  , sensor(NULL)
 {
-    theController->addMouseMoveCallback(mouseMoveEventCB, this);
     portIP.setValue(DEFAULT_OSC_SERVER);
     portIP.setState(DEFAULT_OSC_SERVER);
 }
@@ -57,6 +48,7 @@ SonifySpatial::SonifySpatial() :
 //////////
 SonifySpatial::~SonifySpatial()
 {
+    delete sensor;
 }
 
 
@@ -74,10 +66,6 @@ void SonifySpatial::mouseMoveEventCB(void *p, SoEventCallback *eventCB)
 //////////
 void SonifySpatial::onMouseMoveEvent(SoEventCallback *eventCB)
 {
-#if DEBUG
-    cout <<"** mouse move event ***" << endl;
-#endif
-
     sendCameraParams();
 }
 
@@ -123,8 +111,17 @@ void SonifySpatial::init()
     }
 
     sendCameraParams();
+
+    SoCamera* camera = theController->getCurrentViewer()->getCamera();
+    sensor = new SoNodeSensor(cameraChangeEventCB, this);
+    sensor->attach(camera);
 }
 
+
+void SonifySpatial::cameraChangeEventCB(void *p, SoSensor* s)
+{
+ ((SonifySpatial*)p)->sendCameraParams();
+}
 
 void SonifySpatial::sendCameraParams()
 {
@@ -137,55 +134,25 @@ void SonifySpatial::sendCameraParams()
     float camAngle;
     camera->orientation.getValue(camAxis, camAngle);
     camAxis.getValue(camAxisX, camAxisY, camAxisZ);
-    bool camParamsChanged = false;
-    if(lastCamParams)
     {
-        float deltaPosX = camPosX - lastCamPosX;
-        float deltaPosY = camPosY - lastCamPosY;
-        float deltaPosZ = camPosZ - lastCamPosZ;
-        float deltaAxisX = camAxisX - lastCamAxisX;
-        float deltaAxisY = camAxisY - lastCamAxisY;
-        float deltaAxisZ = camAxisZ - lastCamAxisZ;
-        float deltaAngle = camAngle - lastCamAngle;
-        if ((deltaPosX + deltaPosY + deltaPosZ + 
-             deltaAxisX + deltaAxisY + deltaAxisZ +
-             deltaAngle) > EPSILON)
-        {
-            camParamsChanged = true;
-        }
+        /// create a OSC message
+        tnyosc::Message msg("/camerapos");
+        msg.append(camPosX);
+        msg.append(camPosY);
+        msg.append(camPosZ);
+        /// send the message
+        send(msg);
     }
-
-    if (!lastCamParams || camParamsChanged)
     {
-        {
-            /// create a OSC message
-            tnyosc::Message msg("/camerapos");
-            msg.append(camPosX);
-            msg.append(camPosY);
-            msg.append(camPosZ);
-            /// send the message
-            send(msg);
-        }
-
-        {
-            /// create a OSC message
-            tnyosc::Message msg("/cameraorient");
-            msg.append(camAxisX);
-            msg.append(camAxisY);
-            msg.append(camAxisZ);
-            msg.append(camAngle);
-            /// send the message
-            send(msg);
-        }
+        /// create a OSC message
+        tnyosc::Message msg("/cameraorient");
+        msg.append(camAxisX);
+        msg.append(camAxisY);
+        msg.append(camAxisZ);
+        msg.append(camAngle);
+        /// send the message
+        send(msg);
     }
-
-    lastCamPosX = camPosX;
-    lastCamPosY = camPosY;
-    lastCamPosZ = camPosZ;
-    lastCamAxisX = camAxisX;
-    lastCamAxisY = camAxisY;
-    lastCamAxisZ = camAxisZ;
-    lastCamAngle = camAngle;
 }
 
 
